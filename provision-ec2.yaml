@@ -41,7 +41,7 @@
       detailed_monitoring: no
       network:
         assign_public_ip: true
-        security_group: your-securtiy-group
+        security_group: your-security-group
       key_name: your-key-pair
       termination_protection: no
       state: running
@@ -74,3 +74,13 @@
   - name: Update and upgrade apt packages
     become: yes
     apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+  - name: Install required system packages
+    apt:
+      pkg:
+        - curl
+        - python3-pip
+        - python3-setuptools
+        - ansible
+      state: latest
+      update_cache: true
