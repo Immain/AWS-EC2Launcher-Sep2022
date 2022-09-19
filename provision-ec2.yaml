@@ -5,6 +5,13 @@
   vars_files:
     - aws_keys.yml
   tasks:
+  - name: Send Alert Message in Discord
+    community.general.discord:
+      webhook_id: 
+      webhook_token: 
+      content: "Creating AWS Cloud Instance"
+    delegate_to: localhost
+    
   - name: Create a security group
     ec2_group:
       name: your-security-group
@@ -67,6 +74,13 @@
       state: started
     with_items: "{{ ec2.instances }}"
 
+  - name: Send Alert Message in Discord
+    community.general.discord:
+      webhook_id: 
+      webhook_token: 
+      content: "AWS Cloud Instance Created"
+    delegate_to: localhost
+
 - hosts: Launched
   remote_user: ubuntu
   become: yes
@@ -84,3 +98,13 @@
         - ansible
       state: latest
       update_cache: true
+      
+  - name: Install Ansible Community
+    command: ansible-galaxy collection install community.general
+
+  - name: Install Cronitor
+    command: "{{ item }}"
+    loop:
+      - curl -sOL https://cronitor.io/dl/linux_amd64.tar.gz
+      - sudo tar xvf linux_amd64.tar.gz -C /usr/bin/
+      - sudo cronitor configure --api-key xxx
