@@ -98,13 +98,42 @@
         - ansible
       state: latest
       update_cache: true
+
+  - name: Update Ansible
+    command: python3 -m pip install --upgrade --user ansible
       
   - name: Install Ansible Community
     command: ansible-galaxy collection install community.general
 
-  - name: Install Cronitor
+  - name: "Run {{ item }}"
     command: "{{ item }}"
     loop:
       - curl -sOL https://cronitor.io/dl/linux_amd64.tar.gz
       - sudo tar xvf linux_amd64.tar.gz -C /usr/bin/
       - sudo cronitor configure --api-key xxx
+    
+  - name: Create File Directory for Ansible 
+    file:
+      path: /home/ubuntu/ansible/{{ item }}
+      state: directory
+    with_items:
+      - discord
+      - child-nodes
+
+  - name: Create Discord Alert 
+    copy:
+      dest: "/home/ubuntu/ansible/discord/alert.yml"
+      content: |
+        ---
+        - hosts: localhost
+          tasks:
+          - name: Send Alert Message in Discord
+            community.general.discord:
+              webhook_id: 
+              webhook_token: 
+              content: "EC2 Instance Created and Up To Date - Online :white_check_mark:"
+
+  - name: Run Discord Alert
+    command: ansible-playbook alert.yml
+    args:
+      chdir: /home/ubuntu/ansible/discord/
